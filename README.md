@@ -8,10 +8,10 @@
 
 | 3D 漫游 · 布置模式 | 平面俯视 · 尺寸标注 |
 |---|---|
-| ![3D 漫游与布置模式](docs/screenshots/3d-arrange.jpg) | ![平面俯视](docs/screenshots/plan-view.jpg) |
+| ![3D 漫游与布置模式](946db830-9b3c-435f-92d1-126e4e45e01c.jpg) | ![平面俯视](fe6bd15e-95fc-4734-90e3-733c1c20bf7c.jpg) |
 
 **🖱️ 布置模式**：点选家具出现操作条，直接拖动调整位置
-![拖动家具演示](docs/screenshots/drag-demo.jpg)
+![拖动家具演示](3cf42c1c-b80f-4a54-8b8a-25630c3d2e4b.jpg)
 
 ## ✨ 功能亮点
 
