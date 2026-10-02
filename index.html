@@ -12,27 +12,31 @@
 <style>
   :root{
     --bg:#f2ecdf;
-    --panel:rgba(255,252,245,.94);
+    --panel:rgba(255,253,247,.78);
     --panel-solid:#fffcf5;
-    --ink:#2e2a24;
-    --ink-soft:#6f6759;
-    --accent:#a5763f;
-    --accent-deep:#8a5f30;
-    --line:rgba(46,42,36,.12);
-    --shadow:0 10px 34px rgba(58,45,25,.16);
-    --radius:14px;
+    --ink:#2b2b2b;
+    --ink-soft:#8a857c;
+    --accent:#bc6c3f;
+    --accent-deep:#9e5527;
+    --accent-soft:rgba(188,108,63,.13);
+    --line:rgba(70,54,32,.12);
+    --seg-bg:rgba(120,96,64,.12);
+    --shadow:0 18px 45px rgba(74,54,28,.17),0 4px 14px rgba(74,54,28,.09);
+    --radius:18px;
   }
   @media (prefers-color-scheme: dark){
     :root{
       --bg:#17150f;
-      --panel:rgba(32,29,23,.94);
-      --panel-solid:#24211a;
-      --ink:#f0e9da;
-      --ink-soft:#b3a98f;
-      --accent:#c99a5e;
-      --accent-deep:#d9ab6d;
-      --line:rgba(240,233,218,.14);
-      --shadow:0 10px 34px rgba(0,0,0,.5);
+      --panel:rgba(34,30,24,.78);
+      --panel-solid:#262219;
+      --ink:#f2ead9;
+      --ink-soft:#a89e8a;
+      --accent:#d29a63;
+      --accent-deep:#e0b07c;
+      --accent-soft:rgba(210,154,99,.16);
+      --line:rgba(240,233,218,.13);
+      --seg-bg:rgba(255,255,255,.09);
+      --shadow:0 18px 45px rgba(0,0,0,.5),0 4px 14px rgba(0,0,0,.35);
     }
   }
   *{box-sizing:border-box}
@@ -189,25 +193,143 @@
   #nogl h2{font-family:"Noto Serif SC",serif;margin:0 0 10px;font-size:20px}
   #nogl p{font-size:14px;line-height:1.8;color:var(--ink-soft);margin:0}
 
+  /* ================= 生动化改版：毛玻璃拟态 + 胶囊控件 + 柔和动效 ================= */
+  #topbar,#roomPanel,#infoCard,#tourCard,#hint,.fab-btn,#themePop,#arrangeBar,#selChip{
+    background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);
+    -webkit-backdrop-filter:blur(16px) saturate(1.35);backdrop-filter:blur(16px) saturate(1.35);
+  }
+  #topbar,#roomPanel,#infoCard,#tourCard,.fab-btn,#themePop,#arrangeBar,#selChip,.room-btn,.mini-btn,.tp-btn,#arrangeBtn{
+    transition:background-color .6s ease,border-color .6s ease,color .25s ease,box-shadow .3s ease,transform .25s ease,opacity .3s ease;
+  }
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes slideL{from{opacity:0;transform:translate(-14px,-50%)}to{opacity:1;transform:translate(0,-50%)}}
+
+  /* 顶栏：品牌左对齐 + iOS 分段控件 + 布置开关 */
+  #topbar{
+    left:16px;right:16px;transform:none;justify-content:space-between;flex-wrap:nowrap;
+    border-radius:20px;padding:10px 14px 10px 20px;gap:14px;max-width:none;
+    animation:fadeDown .55s cubic-bezier(.22,.9,.3,1) both;
+  }
+  .brand{display:flex;flex-direction:column;gap:1px;min-width:0;flex:none}
+  .brand .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.24em;white-space:nowrap}
+  .top-ctl{display:flex;align-items:center;gap:10px;flex:none}
+  .view-seg{position:relative;display:flex;align-items:center;gap:2px;background:var(--seg-bg);border-radius:999px;padding:4px}
+  .seg-ind{position:absolute;top:4px;bottom:4px;left:0;width:60px;border-radius:999px;background:var(--panel-solid);box-shadow:0 3px 10px rgba(60,45,20,.18);transition:transform .38s cubic-bezier(.3,.9,.3,1),width .38s cubic-bezier(.3,.9,.3,1)}
+  .view-seg .seg-btn{position:relative;z-index:1}
+  .view-seg .seg-btn.active{background:transparent;color:var(--ink);font-weight:600}
+  .view-seg .seg-btn:hover{transform:none;color:var(--ink)}
+  #arrangeBtn{
+    display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel-solid);
+    color:var(--ink);font:inherit;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;
+  }
+  #arrangeBtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(74,54,28,.16)}
+  #arrangeBtn .arr-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-soft);flex:none;transition:all .25s}
+  #arrangeBtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  #arrangeBtn.on .arr-dot{background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+
+  /* 布置模式提示条 */
+  #arrangeBar{
+    position:fixed;top:88px;left:50%;transform:translate(-50%,-8px);z-index:29;
+    display:flex;align-items:center;gap:8px;border-radius:999px;padding:7px 9px 7px 18px;
+    opacity:0;pointer-events:none;max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center;
+  }
+  body.arrange-mode #arrangeBar{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  #arrangeBar .arr-hint{font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+  #arrangeBar .arr-hint b{color:var(--accent-deep)}
+  .mini-btn{border:1px solid var(--line);background:var(--panel-solid);color:var(--ink);font:inherit;font-size:12.5px;padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .mini-btn:hover{transform:translateY(-1px);border-color:var(--accent);color:var(--accent-deep)}
+  .mini-btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);font-weight:600}
+  .mini-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+
+  /* 左侧房间导航：图标小卡片 */
+  #roomPanel{border-radius:20px;padding:14px 10px;width:198px;animation:slideL .55s .08s cubic-bezier(.22,.9,.3,1) both}
+  .room-btn{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:10px 12px;border-radius:14px;margin:3px 0}
+  .room-btn .ric{display:flex;flex:none;color:var(--ink-soft);transition:color .2s}
+  .room-btn .ric svg{width:22px;height:22px}
+  .room-btn .rname{flex:1}
+  .room-btn:hover{background:var(--accent-soft);transform:translateY(-2px);box-shadow:0 8px 18px rgba(74,54,28,.13)}
+  .room-btn.active{background:var(--accent-soft);border-color:transparent}
+  .room-btn.active .ric{color:var(--accent-deep)}
+  .room-btn.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:3px;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .room-btn.active small{color:var(--accent-deep)}
+
+  /* 家具信息卡：chips + 引用式说明 + 关闭旋转 */
+  #infoCard{border-radius:20px}
+  #infoCard .chip{display:inline-block;background:var(--accent-soft);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:500}
+  #infoCard .chip-mat{background:var(--panel-solid)}
+  #infoCard .desc{border-top:none;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 12px 12px 0;padding:10px 14px}
+  #infoClose{transition:transform .35s ease,color .2s}
+  #infoClose:hover{transform:rotate(90deg)}
+
+  /* 右下角浮动图标按钮组 */
+  .fab-col{position:fixed;right:18px;bottom:18px;z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px;animation:fadeUp .55s .15s ease both}
+  .fab-wrap{position:relative}
+  .fab-btn{display:flex;align-items:center;height:48px;min-width:48px;padding:0 14px;border-radius:999px;cursor:pointer;color:var(--ink);font:inherit}
+  .fab-btn svg{width:20px;height:20px;flex:none}
+  .fab-btn .fab-ic{display:flex}
+  .fab-btn .fab-label{max-width:0;opacity:0;overflow:hidden;white-space:nowrap;font-size:13px;font-weight:500;transition:max-width .32s ease,opacity .25s ease,margin .32s ease}
+  .fab-btn:hover{transform:translateY(-2px)}
+  .fab-btn:hover .fab-label{max-width:120px;opacity:1;margin-left:9px}
+  #tourBtn{background:var(--panel);color:var(--ink);padding:0 14px;box-shadow:var(--shadow)}
+  #tourBtn.playing{background:var(--accent);color:#fff;border-color:var(--accent)}
+  #lightToggle .ic-moon{display:none}
+  #lightToggle.is-night .ic-moon{display:block}
+  #lightToggle.is-night .ic-sun{display:none}
+  #themePop{position:absolute;right:0;bottom:60px;width:192px;border-radius:18px;padding:10px;opacity:0;transform:translateY(8px) scale(.97);pointer-events:none;transition:all .25s ease;z-index:31}
+  #themePop.open{opacity:1;transform:none;pointer-events:auto}
+  #themePop .tp-cap{font-size:11px;letter-spacing:.2em;color:var(--ink-soft);padding:2px 8px 8px}
+  .tp-btn{display:flex;align-items:center;gap:9px;width:100%;border:1px solid transparent;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;padding:9px 10px;border-radius:12px;cursor:pointer;text-align:left}
+  .tp-btn i{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+  .tp-btn:hover{background:var(--accent-soft);transform:translateY(-1px)}
+  .tp-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);font-weight:600}
+
+  /* 选中家具悬浮操作条 */
+  #selChip{position:fixed;z-index:27;display:none;align-items:center;gap:6px;transform:translate(-50%,-100%);border-radius:999px;padding:6px 8px 6px 14px}
+  #selChip .sc-name{font-size:12.5px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #selChip button{border:1px solid var(--line);background:var(--panel-solid);color:var(--ink);font:inherit;font-size:12px;padding:5px 11px;border-radius:999px;cursor:pointer;transition:all .2s;white-space:nowrap}
+  #selChip button:hover{border-color:var(--accent);color:var(--accent-deep);transform:translateY(-1px)}
+
+  /* 加载屏：流光进度 + 百分比 */
+  #loading .l-title{font-size:30px}
+  #loadBar{background:linear-gradient(90deg,var(--accent) 0%,#eccfa5 50%,var(--accent) 100%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+  @keyframes shimmer{from{background-position:200% 0}to{background-position:-100% 0}}
+  #loadPct{font-family:"Noto Serif SC",serif;font-size:15px;color:var(--accent-deep);letter-spacing:.12em}
+
+  #fpPad{bottom:206px}
+  .room-label{border-radius:12px}
+  @media (max-width:1150px){ #topbar .meta{display:none} }
+
   /* ---------- 平板 / 手机 ---------- */
   @media (max-width:900px){
+    #topbar{left:10px;right:10px;top:10px;padding:8px 10px 8px 14px;flex-wrap:wrap;border-radius:18px;gap:8px}
+    .brand .sub{display:none}
+    #topbar .proj{font-size:16px}
+    .top-ctl{margin-left:auto}
+    .view-seg .seg-btn{padding:6px 9px;font-size:12.5px}
+    #arrangeBtn{padding:8px 12px;font-size:12.5px}
+    #arrangeBar{top:auto;bottom:196px;left:10px;right:10px;transform:none;border-radius:18px;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+    #arrangeBar::-webkit-scrollbar{display:none}
+    body.arrange-mode #arrangeBar{transform:none}
+    #arrangeBar .arr-hint{display:none}
     #roomPanel{
-      left:10px;right:10px;top:138px;bottom:auto;transform:none;width:auto;padding:8px;
+      left:10px;right:10px;top:128px;bottom:auto;transform:none;width:auto;padding:8px;animation:none;
       display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;
     }
     #roomPanel::-webkit-scrollbar{display:none}
     #roomPanel h3{display:none}
-    .room-btn{flex:none;width:auto;padding:8px 12px}
+    .room-btn{flex:none;width:auto;padding:8px 11px;margin:0}
     .room-btn small{display:none}
-    #toolbar{bottom:10px}
+    .room-btn.active::before{display:none}
     #hint{display:none}
     #infoCard{top:auto;bottom:0;right:0;left:0;width:auto;max-width:none;border-radius:18px 18px 0 0;transform:none}
     #infoCard.open{animation:cardInM .38s cubic-bezier(.22,.9,.3,1)}
     @keyframes cardInM{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
     #tourCard{bottom:auto;top:196px}
     #fpPad{bottom:auto;top:196px}
-    #topbar{top:10px;padding:8px 16px;gap:10px}
-    #topbar .meta .hide-s{display:none}
+    .fab-col{right:12px;bottom:12px;gap:8px}
+    .fab-btn{height:44px;min-width:44px;padding:0 12px}
+    #themePop{bottom:54px}
   }
 </style>
 </head>
@@ -217,10 +339,30 @@
 
 <!-- 顶部信息条 -->
 <header id="topbar">
-  <span class="proj">现代简约 · 两室一厅</span>
-  <span class="dot"></span>
+  <div class="brand">
+    <span class="proj">现代简约 · 两室一厅</span>
+    <span class="sub">3D 交互方案演示</span>
+  </div>
   <span class="meta"><span>建筑面积 <b>89㎡</b></span><span class="hide-s">户型 <b>两室一厅一厨一卫</b></span><span class="hide-s">层高 <b>2.8m</b></span></span>
+  <div class="top-ctl">
+    <div class="view-seg" role="group" aria-label="视角模式">
+      <span class="seg-ind"></span>
+      <button class="seg-btn active" data-mode="3d">3D 漫游</button>
+      <button class="seg-btn" data-mode="plan">平面俯视</button>
+      <button class="seg-btn" data-mode="fp">第一人称</button>
+    </div>
+    <button id="arrangeBtn" aria-pressed="false"><span class="arr-dot"></span>布置模式</button>
+  </div>
 </header>
+
+<!-- 布置模式提示条 -->
+<div id="arrangeBar">
+  <span class="arr-hint">正在布置 · 拖动家具调整位置，按 <b>R</b> 旋转 45°，ESC 退出</span>
+  <button class="mini-btn" id="snapBtn">网格吸附 0.1m</button>
+  <button class="mini-btn" id="rotateBtn">旋转 45°</button>
+  <button class="mini-btn" id="resetLayoutBtn">重置布局</button>
+  <button class="mini-btn primary" id="exitArrangeBtn">完成</button>
+</div>
 
 <!-- 左侧房间导航 -->
 <nav id="roomPanel" aria-label="房间导航">
@@ -234,8 +376,8 @@
   <span class="room-tag" id="infoRoom">客厅</span>
   <h2 id="infoName">三人沙发</h2>
   <dl>
-    <div><dt>尺寸</dt><dd id="infoSize">—</dd></div>
-    <div><dt>材质</dt><dd id="infoMat">—</dd></div>
+    <div><dt>尺寸</dt><dd><span class="chip" id="infoSize">—</span></dd></div>
+    <div><dt>材质</dt><dd><span class="chip chip-mat" id="infoMat">—</span></dd></div>
   </dl>
   <p class="desc" id="infoDesc">—</p>
 </aside>
@@ -252,25 +394,36 @@
 </div>
 
 <!-- 底部工具栏 -->
-<div id="toolbar">
-  <div class="ctl" role="group" aria-label="视角模式">
-    <span class="cap">视角</span>
-    <button class="seg-btn active" data-mode="3d">3D 漫游</button>
-    <button class="seg-btn" data-mode="plan">平面俯视</button>
-    <button class="seg-btn" data-mode="fp">第一人称</button>
+<!-- 右下角浮动操作组：主题 / 日夜 / 导览 -->
+<div class="fab-col">
+  <div class="fab-wrap">
+    <div id="themePop" role="group" aria-label="材质主题">
+      <div class="tp-cap">材质主题</div>
+      <button class="tp-btn active" data-theme="wood"><i style="background:#c99f6d"></i>原木暖阳</button>
+      <button class="tp-btn" data-theme="grey"><i style="background:#aeb6bd"></i>云雾灰</button>
+      <button class="tp-btn" data-theme="cream"><i style="background:#e7d3ac"></i>奶油白</button>
+    </div>
+    <button class="fab-btn" id="themeFab" aria-label="材质主题">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 2-.85 2-1.7 0-.75-.55-1.25-.55-2 0-.85.65-1.55 1.7-1.55h1.6a4.25 4.25 0 0 0 4.25-4.25C21 6.6 17 3.5 12 3.5z"/><circle cx="7.6" cy="10.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="11" cy="7.2" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.15" fill="currentColor" stroke="none"/></svg>
+      <span class="fab-label">材质主题</span>
+    </button>
   </div>
-  <div class="ctl" role="group" aria-label="材质主题">
-    <span class="cap">主题</span>
-    <button class="seg-btn active" data-theme="wood">原木暖阳</button>
-    <button class="seg-btn" data-theme="grey">云雾灰</button>
-    <button class="seg-btn" data-theme="cream">奶油白</button>
-  </div>
-  <div class="ctl" role="group" aria-label="灯光">
-    <span class="cap">灯光</span>
-    <button class="seg-btn active" data-light="day">白天</button>
-    <button class="seg-btn" data-light="night">夜晚</button>
-  </div>
-  <button id="tourBtn">▶ 自动导览</button>
+  <button class="fab-btn" id="lightToggle" aria-label="切换日夜灯光">
+    <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5 5l1.6 1.6M17.4 17.4L19 19M19 5l-1.6 1.6M6.6 17.4L5 19"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.6A8.2 8.2 0 1 1 10.4 4a6.6 6.6 0 0 0 9.6 9.6z"/></svg>
+    <span class="fab-label">日夜灯光</span>
+  </button>
+  <button class="fab-btn" id="tourBtn" aria-label="自动导览">
+    <span class="fab-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+    <span class="fab-label">自动导览</span>
+  </button>
+</div>
+
+<!-- 布置模式：选中家具悬浮操作 -->
+<div id="selChip">
+  <span class="sc-name" id="selName">家具</span>
+  <button id="chipRotate">旋转 45°</button>
+  <button id="chipDone">完成</button>
 </div>
 
 <div id="hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 点击任意家具查看尺寸与工艺说明</div>
@@ -286,6 +439,7 @@
   <div class="l-title">现代简约 · 两室一厅</div>
   <div class="l-sub">3D 户型展示加载中</div>
   <div id="loadBarWrap"><div id="loadBar"></div></div>
+  <div id="loadPct">0%</div>
   <div id="loadTip">正在准备…</div>
 </div>
 
@@ -339,8 +493,9 @@ var THEMES = {
 /* ---------- DOM ---------- */
 var canvas = document.getElementById('scene');
 var loadBar = document.getElementById('loadBar');
+var loadPct = document.getElementById('loadPct');
 var loadTip = document.getElementById('loadTip');
-function setProgress(p, tip){ loadBar.style.width = Math.round(p*100)+'%'; if(tip) loadTip.textContent = tip; }
+function setProgress(p, tip){ loadBar.style.width = Math.round(p*100)+'%'; loadPct.textContent = Math.round(p*100)+'%'; if(tip) loadTip.textContent = tip; }
 function nextFrame(){ return new Promise(function(res){ requestAnimationFrame(res); }); }
 
 /* ---------- WebGL 检测 ---------- */
@@ -1038,10 +1193,22 @@ function stepFly(dt){
 }
 
 /* 房间导航 */
+/* 房间导航小图标（内联 SVG 简笔画，stroke 跟随文字色） */
+var SVG_A = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+var ROOM_ICONS = {
+  entry:  '<svg '+SVG_A+'><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><circle cx="14.6" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  living: '<svg '+SVG_A+'><path d="M5.5 11V8a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v3"/><path d="M3 13.2A1.8 1.8 0 0 1 6.6 13v1.2h10.8V13A1.8 1.8 0 0 1 21 13.2V16a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16v-2.8z"/><path d="M5.5 20.5v-2M18.5 20.5v-2"/></svg>',
+  dining: '<svg '+SVG_A+'><path d="M3 11h18"/><path d="M5.5 11v8.5M18.5 11v8.5"/><circle cx="12" cy="7.4" r="2.5"/></svg>',
+  kitchen:'<svg '+SVG_A+'><path d="M4 11h16v2.6a7.5 5.2 0 0 1-15 0z"/><path d="M2.5 11h19"/><path d="M9.2 7.2c0-1.4 1.3-1.4 1.3-2.8M13.8 7.2c0-1.4 1.3-1.4 1.3-2.8"/></svg>',
+  master: '<svg '+SVG_A+'><path d="M3 18.5v-7"/><path d="M3 14h18v4.5"/><path d="M3 16.2h18"/><path d="M6.2 14v-1.3A1.7 1.7 0 0 1 7.9 11h2.9a1.7 1.7 0 0 1 1.7 1.7V14"/></svg>',
+  second: '<svg '+SVG_A+'><path d="M5.5 4.5H16a2 2 0 0 1 2 2v13H7.5a2 2 0 0 1-2-2z"/><path d="M5.5 15.5a2 2 0 0 1 2-2H18"/></svg>',
+  bath:   '<svg '+SVG_A+'><path d="M4 12.5h16v1.8a5.2 5.2 0 0 1-5.2 5.2H9.2A5.2 5.2 0 0 1 4 14.3z"/><path d="M6.5 12.5V6.3a2.1 2.1 0 0 1 4.2 0"/><path d="M6.8 19.5L6 21.5M17.2 19.5l.8 2"/></svg>',
+  balcony:'<svg '+SVG_A+'><circle cx="16.5" cy="6.5" r="2.4"/><path d="M16.5 2v1.2M21.3 6.5h-1.2M19.9 3.1l-.9.9"/><path d="M4 21v-6.5M9 21v-6.5M14 21v-6.5M3 14.5h12M3 21h18"/></svg>'
+};
 var roomPanel = document.getElementById('roomPanel');
 ROOMS.forEach(function(r){
   var b=document.createElement('button'); b.className='room-btn'; b.dataset.room=r.id;
-  b.innerHTML='<span>'+r.name+'</span><small>'+roomDims(r)+'</small>';
+  b.innerHTML='<span class="ric">'+(ROOM_ICONS[r.id]||'')+'</span><span class="rname">'+r.name+'</span><small>'+roomDims(r)+'</small>';
   b.addEventListener('click', function(){ selectRoom(r.id, true); });
   roomPanel.appendChild(b);
 });
@@ -1074,7 +1241,7 @@ canvas.addEventListener('pointerup', function(e){
   if(!pointerDown) return;
   var moved = Math.hypot(e.clientX-pointerDown.x, e.clientY-pointerDown.y);
   pointerDown = null;
-  if(moved>6 || state.mode==='plan') return;
+  if(moved>6 || state.mode==='plan' || arrange.on) return;
   pickAt(e.clientX, e.clientY);
 });
 function pickAt(cx, cy){
@@ -1109,10 +1276,22 @@ function hideInfo(){
 }
 document.getElementById('infoClose').addEventListener('click', hideInfo);
 
-/* 材质主题换肤（0.6s 过渡） */
+/* 材质主题换肤（0.6s 过渡）；UI accent 色同步跟随 */
+var THEME_ACCENTS = {
+  wood: ['#bc6c3f','#9e5527','rgba(188,108,63,.13)'],
+  grey: ['#71879c','#55677a','rgba(113,135,156,.14)'],
+  cream:['#bd8f4e','#9c6f36','rgba(189,143,78,.14)']
+};
 var themeAnim = null;
 function setTheme(name){
   state.theme = name;
+  var acc = THEME_ACCENTS[name];
+  if(acc){
+    document.documentElement.style.setProperty('--accent', acc[0]);
+    document.documentElement.style.setProperty('--accent-deep', acc[1]);
+    document.documentElement.style.setProperty('--accent-soft', acc[2]);
+  }
+  var tp = document.getElementById('themePop'); if(tp) tp.classList.remove('open');
   document.querySelectorAll('[data-theme]').forEach(function(b){ b.classList.toggle('active', b.dataset.theme===name); });
   var from={}, to={};
   Object.keys(themedMats).forEach(function(k){
@@ -1149,6 +1328,7 @@ var LIGHT_TARGETS = {
 var lightTgt = LIGHT_TARGETS.day;
 function setLight(night){
   state.night = night;
+  var lt = document.getElementById('lightToggle'); if(lt) lt.classList.toggle('is-night', night);
   lightTgt = night ? LIGHT_TARGETS.night : LIGHT_TARGETS.day;
   poke(1800); /* 灯光参数约 1.5s 内趋近目标 */
   document.querySelectorAll('[data-light]').forEach(function(b){
@@ -1206,6 +1386,8 @@ function setMode(mode){
     var c = state.room ? roomCenter(roomById(state.room)) : [-3.3, 2.2];
     enterFP(c[0], c[1]);
   }
+  updateSegInd();
+  if(mode!=='3d' && arrange.on) setArrange(false);   /* 布置仅在 3D 漫游下，切走视角自动退出 */
   poke(300);
 }
 document.querySelectorAll('[data-mode]').forEach(function(b){
@@ -1264,14 +1446,18 @@ function stepFP(dt){
 }
 
 /* 自动导览：玄关→客厅→餐厅→厨房→主卧→次卧→卫生间→阳台，每站 4 秒 */
+var SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+var SVG_STOP = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>';
 var tourCard=document.getElementById('tourCard');
 var tourTimer=null, tourIdx=-1, tourStart=0;
 var TOUR_ORDER=['entry','living','dining','kitchen','master','second','bath','balcony'];
 function startTour(){
   if(state.mode!=='3d') setMode('3d');
   state.tour=true; tourIdx=-1;
-  document.getElementById('tourBtn').textContent='■ 导览中…';
-  document.getElementById('tourBtn').classList.add('playing');
+  var tb=document.getElementById('tourBtn');
+  tb.querySelector('.fab-label').textContent='导览中…';
+  tb.querySelector('.fab-ic').innerHTML=SVG_STOP;
+  tb.classList.add('playing');
   tourCard.classList.add('show');
   nextTourStep();
 }
@@ -1290,12 +1476,255 @@ function nextTourStep(){
 function stopTour(){
   if(tourTimer) clearTimeout(tourTimer);
   tourTimer=null; state.tour=false;
-  document.getElementById('tourBtn').textContent='▶ 自动导览';
-  document.getElementById('tourBtn').classList.remove('playing');
+  var tb=document.getElementById('tourBtn');
+  tb.querySelector('.fab-label').textContent='自动导览';
+  tb.querySelector('.fab-ic').innerHTML=SVG_PLAY;
+  tb.classList.remove('playing');
   tourCard.classList.remove('show');
 }
 document.getElementById('tourBtn').addEventListener('click', function(){ state.tour ? stopTour() : startTour(); });
 document.getElementById('tourStop').addEventListener('click', stopTour);
+
+/* ================= 布置模式：拖动 / 旋转 / 重置家具 =================
+   初始摆位在 init() 建模完成后由 snapshotLayout() 快照进 INIT_LAYOUT，
+   家具位置数据集中在此：拖动只改根节点的 position.x/z 与 rotation.y。 */
+var INIT_LAYOUT = [];
+function snapshotLayout(){
+  INIT_LAYOUT = pickables.map(function(o){
+    o.userData.baseY = o.position.y;
+    o.userData.rotTgt = o.rotation.y;
+    return { o:o, x:o.position.x, z:o.position.z, r:o.rotation.y };
+  });
+}
+var arrange = { on:false, sel:null, dragging:false, snap:false, lift:0, liftObj:null, selTop:1,
+  target:new THREE.Vector3(), offset:new THREE.Vector3(), pointers:{}, tweens:[] };
+var dragPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);   /* 地面拖动平面 y=0 */
+var selChip = document.getElementById('selChip');
+var selName = document.getElementById('selName');
+
+/* 选中柔光圈：径向渐变贴图圆盘，贴地跟随家具 */
+var glowTex = makeCanvas(256,256,function(g){
+  var gr = g.createRadialGradient(128,128,8,128,128,128);
+  gr.addColorStop(0,'rgba(255,196,130,0.9)');
+  gr.addColorStop(0.55,'rgba(232,164,94,0.38)');
+  gr.addColorStop(1,'rgba(232,164,94,0)');
+  g.fillStyle = gr; g.fillRect(0,0,256,256);
+});
+var glowDisc = new THREE.Mesh(new THREE.CircleGeometry(1,40),
+  new THREE.MeshBasicMaterial({ map:glowTex, transparent:true, depthWrite:false, opacity:0.85 }));
+glowDisc.rotation.x = -Math.PI/2; glowDisc.position.y = 0.02;
+glowDisc.visible = false; glowDisc.renderOrder = 5;
+scene.add(glowDisc);
+
+function setArrange(on){
+  arrange.on = on;
+  document.body.classList.toggle('arrange-mode', on);
+  var ab = document.getElementById('arrangeBtn');
+  ab.classList.toggle('on', on);
+  ab.setAttribute('aria-pressed', on ? 'true' : 'false');
+  canvas.style.cursor = on ? 'grab' : '';
+  if(on){
+    if(state.mode !== '3d') setMode('3d');
+    hideInfo();
+  } else {
+    selectFurniture(null);
+    arrange.dragging = false;
+    orbit.enabled = (state.mode === '3d');
+  }
+  poke(300);
+}
+function selectFurniture(obj){
+  if(arrange.sel && arrange.sel !== obj) arrange.liftObj = arrange.sel;   /* 上一件家具缓缓落回 */
+  arrange.sel = obj;
+  arrange.lift = 0;
+  if(obj){
+    if(arrange.liftObj === obj) arrange.liftObj = null;
+    var bb = new THREE.Box3().setFromObject(obj);
+    var sz = bb.getSize(new THREE.Vector3());
+    var rad = Math.max(0.5, Math.max(sz.x, sz.z)*0.62 + 0.2);
+    glowDisc.scale.set(rad, rad, 1);
+    arrange.selTop = bb.max.y + 0.12;
+    arrange.target.copy(obj.position);
+    selName.textContent = (obj.userData.info || {}).name || '家具';
+    glowDisc.visible = true;
+    positionGlow();
+  } else {
+    glowDisc.visible = false;
+    selChip.style.display = 'none';
+  }
+  poke(400);
+}
+function positionGlow(){
+  if(!arrange.sel) return;
+  glowDisc.position.x = arrange.sel.position.x;
+  glowDisc.position.z = arrange.sel.position.z;
+}
+var _sv = new THREE.Vector3();
+function updateSelChip(){
+  if(!arrange.sel) return;
+  arrange.sel.getWorldPosition(_sv);
+  _sv.y = arrange.selTop;
+  _sv.project(perspCam);
+  if(_sv.z > 1){ selChip.style.display = 'none'; return; }
+  selChip.style.display = 'flex';
+  selChip.style.left = ((_sv.x*0.5+0.5)*window.innerWidth) + 'px';
+  selChip.style.top = ((-_sv.y*0.5+0.5)*window.innerHeight - 12) + 'px';
+}
+function pickFurnitureAt(cx, cy){
+  var ndc = new THREE.Vector2((cx/window.innerWidth)*2-1, -(cy/window.innerHeight)*2+1);
+  raycaster.setFromCamera(ndc, perspCam);
+  var hits = raycaster.intersectObjects(pickables, true);
+  for(var i=0;i<hits.length;i++){
+    var o = hits[i].object;
+    while(o && !o.userData.info) o = o.parent;
+    if(o){
+      var pt = new THREE.Vector3();
+      if(!raycaster.ray.intersectPlane(dragPlane, pt)) pt.copy(o.position);
+      return { obj:o, point:pt };
+    }
+  }
+  return null;
+}
+/* 家具活动范围：主户型矩形 + 阳台矩形，越界松手后由插值弹回 */
+function clampToFloor(x, z){
+  if(z > 3.85 && x <= -2.55) return [Math.max(-5.15, Math.min(-2.55, x)), Math.max(3.85, Math.min(5.35, z))];
+  return [Math.max(-5.15, Math.min(5.15, x)), Math.max(-3.85, Math.min(3.85, z))];
+}
+canvas.addEventListener('pointerdown', function(e){
+  if(!arrange.on || state.mode !== '3d') return;
+  if(e.pointerType === 'mouse' && e.button !== 0) return;
+  arrange.pointers[e.pointerId] = true;
+  if(Object.keys(arrange.pointers).length > 1){   /* 第二指落下：取消拖动，多指手势交还视角旋转/缩放 */
+    arrange.dragging = false;
+    orbit.enabled = true;
+    canvas.style.cursor = 'grab';
+    return;
+  }
+  var hit = pickFurnitureAt(e.clientX, e.clientY);
+  if(hit){
+    selectFurniture(hit.obj);
+    arrange.dragging = true;
+    arrange.offset.copy(hit.point).sub(hit.obj.position); arrange.offset.y = 0;
+    arrange.target.copy(hit.obj.position);
+    orbit.enabled = false;               /* 拖动期间禁用 OrbitControls，避免与相机旋转冲突 */
+    canvas.style.cursor = 'grabbing';
+    poke();
+  } else {
+    selectFurniture(null);
+  }
+});
+window.addEventListener('pointermove', function(e){
+  if(!arrange.on || !arrange.dragging || !arrange.sel || !arrange.pointers[e.pointerId]) return;
+  var ndc = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+  raycaster.setFromCamera(ndc, perspCam);
+  var pt = new THREE.Vector3();
+  if(raycaster.ray.intersectPlane(dragPlane, pt)){
+    arrange.target.set(pt.x - arrange.offset.x, arrange.sel.position.y, pt.z - arrange.offset.z);
+    if(arrange.snap){   /* 网格吸附 0.1m */
+      arrange.target.x = Math.round(arrange.target.x*10)/10;
+      arrange.target.z = Math.round(arrange.target.z*10)/10;
+    }
+    poke();
+  }
+});
+function endArrangePointer(e){
+  if(e.pointerId != null) delete arrange.pointers[e.pointerId];
+  if(!arrange.dragging) return;
+  arrange.dragging = false;
+  if(arrange.sel){   /* 松手钳回合法区域，平滑插值形成弹性回弹 */
+    var c = clampToFloor(arrange.target.x, arrange.target.z);
+    arrange.target.x = c[0]; arrange.target.z = c[1];
+  }
+  orbit.enabled = (state.mode === '3d');
+  canvas.style.cursor = arrange.on ? 'grab' : '';
+  poke(300);
+}
+window.addEventListener('pointerup', endArrangePointer);
+window.addEventListener('pointercancel', endArrangePointer);
+
+/* 旋转 / 重置补间（与渲染循环解耦，仅推进数值） */
+function tweenObj(o, toPos, toRot, dur){
+  arrange.tweens = arrange.tweens.filter(function(t){ return t.o !== o; });
+  arrange.tweens.push({ o:o, t:0, dur:dur || 0.45,
+    x0:o.position.x, z0:o.position.z, r0:o.rotation.y,
+    x1:toPos ? toPos.x : o.position.x, z1:toPos ? toPos.z : o.position.z,
+    r1:(toRot != null ? toRot : o.rotation.y) });
+  if(toRot != null) o.userData.rotTgt = toRot;
+  poke((dur || 0.45)*1000 + 120);
+}
+function rotateSelected(){
+  if(!arrange.sel) return;
+  var o = arrange.sel;
+  var base = (o.userData.rotTgt != null ? o.userData.rotTgt : o.rotation.y);
+  tweenObj(o, null, base + Math.PI/4, 0.42);   /* 45° 步进 */
+}
+function resetLayout(){
+  INIT_LAYOUT.forEach(function(it){ tweenObj(it.o, { x:it.x, z:it.z }, it.r, 0.65); });
+}
+function stepArrange(dt){
+  for(var i=arrange.tweens.length-1; i>=0; i--){
+    var tw = arrange.tweens[i];
+    tw.t += dt/tw.dur;
+    var e = 1 - Math.pow(1 - Math.min(1, tw.t), 3);
+    tw.o.position.x = tw.x0 + (tw.x1-tw.x0)*e;
+    tw.o.position.z = tw.z0 + (tw.z1-tw.z0)*e;
+    tw.o.rotation.y = tw.r0 + (tw.r1-tw.r0)*e;
+    if(tw.t >= 1) arrange.tweens.splice(i,1);
+  }
+  if(arrange.liftObj){
+    var lo = arrange.liftObj, by = lo.userData.baseY || 0;
+    lo.position.y += (by - lo.position.y)*Math.min(1, dt*10);
+    if(Math.abs(lo.position.y - by) < 0.002){ lo.position.y = by; arrange.liftObj = null; }
+  }
+  var o = arrange.sel;
+  if(!o) return;
+  var hasTw = false;
+  for(var j=0;j<arrange.tweens.length;j++) if(arrange.tweens[j].o === o) hasTw = true;
+  if(hasTw) arrange.target.set(o.position.x, o.position.y, o.position.z);
+  var k = 1 - Math.exp(-dt*12);   /* 拖动平滑插值（帧率无关指数趋近） */
+  o.position.x += (arrange.target.x - o.position.x)*k;
+  o.position.z += (arrange.target.z - o.position.z)*k;
+  arrange.lift += (0.05 - arrange.lift)*Math.min(1, dt*8);   /* 选中轻微上浮 */
+  o.position.y = (o.userData.baseY || 0) + arrange.lift + Math.sin(performance.now()*0.003)*0.008;
+  positionGlow();
+  glowDisc.material.opacity = 0.72 + 0.22*Math.sin(performance.now()*0.004);
+  updateSelChip();
+}
+
+/* 布置模式控件接线 */
+document.getElementById('arrangeBtn').addEventListener('click', function(){ setArrange(!arrange.on); });
+document.getElementById('exitArrangeBtn').addEventListener('click', function(){ setArrange(false); });
+document.getElementById('rotateBtn').addEventListener('click', rotateSelected);
+document.getElementById('chipRotate').addEventListener('click', rotateSelected);
+document.getElementById('chipDone').addEventListener('click', function(){ setArrange(false); });
+document.getElementById('resetLayoutBtn').addEventListener('click', resetLayout);
+var snapBtn = document.getElementById('snapBtn');
+snapBtn.addEventListener('click', function(){
+  arrange.snap = !arrange.snap;
+  snapBtn.classList.toggle('on', arrange.snap);
+});
+window.addEventListener('keydown', function(e){
+  if(!arrange.on) return;
+  if(e.code === 'KeyR') rotateSelected();
+  if(e.code === 'Escape') setArrange(false);
+});
+
+/* 右下角浮动组：主题弹层 / 日夜切换 */
+var themeFab = document.getElementById('themeFab');
+var themePop = document.getElementById('themePop');
+themeFab.addEventListener('click', function(e){ e.stopPropagation(); themePop.classList.toggle('open'); });
+document.addEventListener('click', function(e){ if(!themePop.contains(e.target)) themePop.classList.remove('open'); });
+document.getElementById('lightToggle').addEventListener('click', function(){ setLight(!state.night); });
+
+/* 顶栏分段控件滑动指示条 */
+function updateSegInd(){
+  var act = document.querySelector('.view-seg .seg-btn.active');
+  var ind = document.querySelector('.seg-ind');
+  if(!act || !ind) return;
+  ind.style.width = act.offsetWidth + 'px';
+  ind.style.transform = 'translateX(' + act.offsetLeft + 'px)';
+}
+window.addEventListener('load', updateSegInd);
 
 /* ---------- 渲染循环 ---------- */
 var clock = new THREE.Clock();
@@ -1304,7 +1733,7 @@ var camMode = function(){ return state.mode==='plan' ? planCam : perspCam; };
 function animate(){
   requestAnimationFrame(animate);
   var dt = Math.min(0.05, clock.getDelta());
-  stepFly(dt); stepTheme(dt); stepLight(dt); stepFP(dt);
+  stepFly(dt); stepTheme(dt); stepLight(dt); stepFP(dt); stepArrange(dt);
   if(orbit.enabled) orbit.update();
   if(planCtrl.enabled) planCtrl.update();
   /* 娃娃机视角：相机高于屋顶时隐藏天花与筒灯，室内一览无余 */
@@ -1315,9 +1744,9 @@ function animate(){
     document.getElementById('tourBar').style.width=(p*100)+'%';
   }
   /* 按需渲染：飞行/过渡/第一人称/导览期间逐帧渲染，其余仅在画面脏时渲染 */
-  var active = !!fly || !!themeAnim || performance.now()<animUntil || state.mode==='fp' || state.tour;
+  var active = !!fly || !!themeAnim || performance.now()<animUntil || state.mode==='fp' || state.tour || arrange.on || arrange.tweens.length>0 || !!arrange.liftObj;
   if(dirty || active){
-    if(!shadowBaked){ renderer.shadowMap.needsUpdate = true; }
+    if(!shadowBaked || arrange.on || arrange.tweens.length>0){ renderer.shadowMap.needsUpdate = true; }   /* 布置拖动/补间期间阴影实时跟随 */
     renderer.render(scene, camMode());
     shadowBaked = true;
     dirty = false;
@@ -1330,6 +1759,7 @@ window.addEventListener('resize', function(){
   perspCam.aspect = window.innerWidth/window.innerHeight;
   perspCam.updateProjectionMatrix();
   fitPlanCam();
+  updateSegInd();
   poke();
 });
 
@@ -1341,6 +1771,7 @@ window.addEventListener('resize', function(){
       await nextFrame();
       BUILD_STEPS[i][1]();
     }
+    snapshotLayout();
     setProgress(1, '加载完成');
     animate();
     await nextFrame();
@@ -1349,6 +1780,7 @@ window.addEventListener('resize', function(){
     flyTo([-8.6, 7.2, 10.8],[0,0.5,0.8], 2.2);
     selectRoom('living', false);
     setTheme('wood'); setLight(false);
+    updateSegInd(); setTimeout(updateSegInd, 400);
   }catch(err){
     setProgress(1, '加载出错：'+err.message);
     if(window.console) console.error(err);
